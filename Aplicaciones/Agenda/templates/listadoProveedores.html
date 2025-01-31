@@ -1,0 +1,45 @@
+{% extends "./plantilla.html" %}
+{% block body %}
+<br><br><br><br>
+<div class="container" style="max-width: 1500px;">
+    <div class="card">
+        <div class="card-title text-center">
+            <h3><b>Listado de Proveedores</b></h3>
+        </div>
+        <div class="text-end">
+            <a href="{% url 'nuevoProveedor' %}" class="btn btn-success">Agregar Proveedor</a>
+        </div>
+        <br>
+        <table class="table table-bordered table-striped table-hover" id="tbl-proveedores">
+            <thead>
+                <tr>
+                    <td>ID</td>
+                    <td>RUC</td>
+                    <td>Nombre</td>
+                    <td>Teléfono</td>
+                    <td>Estado</td>
+                    <td>Acciones</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for proveedor in proveedores %}
+                <tr>
+                    <td>{{ proveedor.id_prove }}</td>
+                    <td>{{ proveedor.ruc_prove }}</td>
+                    <td>{{ proveedor.nombre_prove }}</td>
+                    <td>{{ proveedor.telefono_prove }}</td>
+                    <td>{{ proveedor.estado_prove }}</td>
+                    <td>
+                        <a href="{% url 'editarProveedor' proveedor.id_prove %}" class="btn btn-warning">Editar</a>
+                        <a href="{% url 'eliminarProveedor' proveedor.id_prove %}" onclick="return confirm('¿Estás seguro?');" class="btn btn-danger">Eliminar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <script>
+            let table = new DataTable('#tbl-proveedores');
+        </script>
+    </div>
+</div>
+{% endblock %}

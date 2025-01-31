@@ -1,0 +1,69 @@
+{% extends "./plantilla.html" %}
+{% block body %}
+<br><br><br><br>
+<h4 style="text-align: center;">Editar Producto</h4>
+<div class="container-fluid">
+    <div class="row justify-content-center"> 
+        <div class="col-md-6 col-lg-4">
+            <form id="editarProductoForm" action="{% url 'procesarActualizacionProducto' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="id_prod" value="{{ productoEditar.id_prod }}">
+                
+                <label><b>Nombre:</b></label>
+                <input type="text" name="nombre_prod" value="{{ productoEditar.nombre_prod }}" class="form-control" required>
+                
+                <label><b>Stock:</b></label>
+                <input type="number" name="stock_prod" value="{{ productoEditar.stock_prod }}" class="form-control" required>
+                
+                <label><b>Precio:</b></label>
+                <input type="number" step="0.01" name="precio_prod" value="{{ precio_formateado }}" class="form-control" required>
+                
+                <label><b>Tipo:</b></label>
+                <select name="tipo_prod" class="form-control" id="tipo">
+                    <option value="comestible"{% if productoEditar.estado_prove == 'comestible' %}selected{% endif %}>comestible</option>
+                    <option value="bebida"{% if productoEditar.estado_prove == 'bebida' %}selected{% endif %}>bebida</option>
+                    <option value="lácteo"{% if productoEditar.estado_prove == 'lácteo' %}selected{% endif %}>lácteo</option>
+                    <option value="carnes"{% if productoEditar.estado_prove == 'carnes' %}selected{% endif %}>carnes</option>
+                </select>
+                
+                <label><b>Fecha:</b></label>
+                <input type="date" name="fecha_prod" value="{{ productoEditar.fecha_prod|date:'Y-m-d' }}" class="form-control" required>
+                
+                <label><b>Cantidad:</b></label>
+                <input type="number" name="cantidad_prod" value="{{ productoEditar.cantidad_prod }}" class="form-control" required>
+                
+                <label><b>Proveedor:</b></label>
+                <select name="id_prove" class="form-control" required>
+                    <option value="">Seleccione un proveedor</option>
+                    {% for proveedor in proveedores %}
+                        <option value="{{ proveedor.id_prove }}" {% if proveedor.id_prove == productoEditar.id_prove.id_prove %}selected{% endif %}>
+                            {{ proveedor.nombre_prove }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <br>
+                <button type="submit" class="btn btn-warning">Actualizar</button>
+                <a href="{% url 'listadoProductos' %}" class="btn btn-secondary">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('editarProductoForm').addEventListener('submit', function(event) {
+        let nombre = document.getElementsByName('nombre_prod')[0].value.trim();
+        let stock = document.getElementsByName('stock_prod')[0].value.trim();
+        let precio = document.getElementsByName('precio_prod')[0].value.trim();
+        let tipo = document.getElementsByName('tipo_prod')[0].value.trim();
+        let fecha = document.getElementsByName('fecha_prod')[0].value.trim();
+        let cantidad = document.getElementsByName('cantidad_prod')[0].value.trim();
+        let proveedor = document.getElementsByName('id_prove')[0].value;
+
+        if (!nombre || !stock || !precio || !tipo || !fecha || !cantidad || !proveedor) {
+            event.preventDefault();
+            alert('Por favor, complete todos los campos antes de actualizar.');
+        }
+    });
+</script>
+{% endblock %}

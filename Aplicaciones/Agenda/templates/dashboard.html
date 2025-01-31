@@ -1,0 +1,183 @@
+{% extends "./plantilla.html" %}
+{% load static %}
+
+{% block body %}
+
+<div class="container mt-5">
+    <!-- Encabezado con botones -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-primary fw-bold">Dashboard</h1>
+        <div>
+            <button id="show-kpis-btn" class="btn btn-outline-success border-2">
+                <i class="fas fa-chart-bar"></i> Tablero de Indicadores
+            </button>
+            <a href="http://localhost:8000/admin/" class="btn btn-outline-primary border-2 ms-3">
+                <i class="fas fa-user-shield"></i> Administrador
+            </a>
+            <button class="btn btn-info print-btn ms-3" onclick="window.print();">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- Sección de KPIs -->
+    <div id="kpis-container" class="row mt-4 d-none fade-in">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white text-center fw-bold">
+                    <i class="fas fa-industry"></i> Estado de Proveedores
+                </div>
+                <div class="card-body">
+                    <canvas id="estado_proveedores" class="w-100" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white text-center fw-bold">
+                    <i class="fas fa-boxes"></i> Tipo de Producto
+                </div>
+                <div class="card-body">
+                    <canvas id="tipo_producto" class="w-100" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white text-center fw-bold">
+                    <i class="fas fa-exclamation-triangle"></i> Productos con Bajo Stock
+                </div>
+                <div class="card-body">
+                    <canvas id="productos_bajos_stock" class="w-100" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos mejorados -->
+<style>
+    .fade-in {
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    .fade-in.show {
+        opacity: 1;
+    }
+
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+
+        #kpis-container, #kpis-container * {
+            visibility: visible;
+        }
+
+        .print-btn, #show-kpis-btn, .btn-outline-primary {
+            display: none;
+        }
+
+        @page {
+            size: auto;
+            margin: 10mm;
+        }
+
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+            page-break-inside: avoid;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const kpisContainer = document.getElementById("kpis-container");
+        const showKpisBtn = document.getElementById("show-kpis-btn");
+        let charts = {};
+
+        showKpisBtn.addEventListener("click", function () {
+            kpisContainer.classList.toggle("d-none");
+            setTimeout(() => {
+                kpisContainer.classList.toggle("show");
+            }, 50);
+
+            if (!kpisContainer.classList.contains("d-none")) {
+                cargarGraficos();
+            }
+        });
+
+        function crearGrafico(idCanvas, tipo, etiquetas, datos, colores, etiqueta) {
+            let ctx = document.getElementById(idCanvas).getContext("2d");
+
+            // Si el gráfico ya existe, lo destruimos antes de crear uno nuevo
+            if (charts[idCanvas]) {
+                charts[idCanvas].destroy();
+            }
+
+            if (etiquetas.length === 0 || datos.length === 0) {
+                document.getElementById(idCanvas).parentElement.innerHTML = "<p class='text-center text-muted'>No hay datos disponibles</p>";
+                return;
+            }
+
+            charts[idCanvas] = new Chart(ctx, {
+                type: tipo,
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        label: etiqueta,
+                        data: datos,
+                        backgroundColor: colores,
+                        borderColor: colores.map(c => c.replace("0.5", "1")),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: etiqueta }
+                        },
+                        x: {
+                            title: { display: true, text: "Categoría" }
+                        }
+                    }
+                }
+            });
+        }
+
+        function cargarGraficos() {
+            // Gráfico: Estado de Proveedores
+            let estados = [], cantidades = [];
+            {% for proveedor in proveedores %}
+                estados.push("{{ proveedor.estado_prove }}");
+                cantidades.push({{ proveedor.count }});
+            {% endfor %}
+            crearGrafico("estado_proveedores", "bar", estados, cantidades, ["#96ac60", "#FF6565"], "Cantidad de Proveedores");
+
+            // Gráfico: Tipo de Producto
+            let tiposProducto = [], cantidadesProducto = [];
+            {% for producto in productos %}
+                tiposProducto.push("{{ producto.tipo_prod }}");
+                cantidadesProducto.push({{ producto.count }});
+            {% endfor %}
+            crearGrafico("tipo_producto", "bar", tiposProducto, cantidadesProducto, ["#66b3ff", "#ff6666", "#99ff99", "#ffcc66"], "Cantidad de Productos");
+
+            // Gráfico: Productos con Bajo Stock
+            let nombresProductos = [], stocks = [];
+            {% for producto in productos_bajos_stock %}
+                nombresProductos.push("{{ producto.nombre_prod }}");
+                stocks.push({{ producto.stock_prod }});
+            {% endfor %}
+            crearGrafico("productos_bajos_stock", "bar", nombresProductos, stocks, ["#FF6565"], "Stock de Productos");
+        }
+    });
+</script>
+
+{% endblock %}

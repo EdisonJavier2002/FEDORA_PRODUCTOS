@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block body %}
-
 <div class="container mt-5">
     <!-- Encabezado con botones -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -22,37 +21,145 @@
 
     <!-- Sección de KPIs -->
     <div id="kpis-container" class="row mt-4 d-none fade-in">
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white text-center fw-bold">
-                    <i class="fas fa-industry"></i> Estado de Proveedores
+        <!-- Primera fila de KPIs -->
+        <div class="row mb-4">
+            <!-- KPI Estado de Consumo -->
+            <div class="col-md-4 col-sm-6 col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white text-center fw-bold">
+                        <i class="fas fa-industry"></i> Estado de Consumo
+                    </div>
+                    <div class="card-body">
+                        <canvas id="estado_consumo" class="w-100" height="300"></canvas>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <canvas id="estado_proveedores" class="w-100" height="300"></canvas>
+            </div>
+
+            <!-- KPI Estado de Perfil -->
+            <div class="col-md-4 col-sm-6 col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white text-center fw-bold">
+                        <i class="fas fa-user-circle"></i> Estado de Perfil
+                    </div>
+                    <div class="card-body">
+                        <canvas id="estado_perfil" class="w-100" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- KPI Estado de Medidor -->
+            <div class="col-md-4 col-sm-6 col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-white text-center fw-bold">
+                        <i class="fas fa-tachometer-alt"></i> Estado de Medidores
+                    </div>
+                    <div class="card-body">
+                        <canvas id="estado_medidores" class="w-100" height="300"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white text-center fw-bold">
-                    <i class="fas fa-boxes"></i> Tipo de Producto
+        <br>
+         <!-- Segunda fila de KPIs -->
+        <div class="row mb-4">
+            <!-- Historial de Propietario -->
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-white text-center fw-bold">
+                        <i class="fas fa-history"></i> Historial de Propietario
+                    </div>
+                    <div class="card-body">
+                        <canvas id="historial_propietario" class="w-100" height="300"></canvas>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <canvas id="tipo_producto" class="w-100" height="300"></canvas>
+            </div>
+
+            <!--Obtener el total de recaudaciones agrupadas por año, mes e impuesto -->
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white text-center fw-bold">
+                        <i class="fas fa-money-bill-wave"></i> Recaudaciones por Impuesto
+                    </div>
+                    <div class="card-body">
+                        <canvas id="recaudaciones_impuestos" class="w-100" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Gráfico de Recaudaciones -->
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-white text-center fw-bold">
+                        <i class="fas fa-users"></i> Top 5 Socios con Más Recaudaciones
+                    </div>
+                    <div class="card-body">
+                        <canvas id="socios_recaudaciones" class="w-100" height="300"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-danger text-white text-center fw-bold">
-                    <i class="fas fa-exclamation-triangle"></i> Productos con Bajo Stock
-                </div>
-                <div class="card-body">
-                    <canvas id="productos_bajos_stock" class="w-100" height="300"></canvas>
+         <!-- Tercera fila de KPIs -->
+        <div class="row mb-4">
+            <!-- Nuevo gráfico para Estado de Tarifas -->
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-white text-center fw-bold">
+                        <i class="fas fa-tags"></i> Estado de Tarifas
+                    </div>
+                    <div class="card-body">
+                        <canvas id="estado_tarifas" class="w-100" height="300"></canvas>
+                    </div>
                 </div>
             </div>
+
+            <!-- Nuevo gráfico: Medidores por Ruta -->
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-white text-center fw-bold">
+                        <i class="fas fa-tachometer-alt"></i> Medidores por Ruta
+                    </div>
+                    <div class="card-body">
+                        <canvas id="medidores_por_ruta" class="w-100" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nuevo KPI: Estado de Ruta -->
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-white text-center fw-bold">
+                        <i class="fas fa-road"></i> Estado de Ruta
+                    </div>
+                    <div class="card-body">
+                        <canvas id="estado_ruta" class="w-100" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            
+        </div>
+        <!-- Cuarta fila de KPIs -->
+        <div class="row mb-4">
+            <!-- Nuevo KPI: Últimos 10 Comunicados -->
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white text-center fw-bold">
+                        <i class="fas fa-bullhorn"></i> Últimos 2 Comunicados
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            {% for comunicado in comunicados %}
+                                <li><strong>{{ comunicado.fecha_com }}</strong>: {{ comunicado.mensaje_com }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+    
+
+            
         </div>
     </div>
 </div>
@@ -145,7 +252,7 @@
                             title: { display: true, text: etiqueta }
                         },
                         x: {
-                            title: { display: true, text: "Categoría" }
+                            title: { display: true, text: "Estado de Consumo" }
                         }
                     }
                 }
@@ -153,29 +260,80 @@
         }
 
         function cargarGraficos() {
-            // Gráfico: Estado de Proveedores
-            let estados = [], cantidades = [];
-            {% for proveedor in proveedores %}
-                estados.push("{{ proveedor.estado_prove }}");
-                cantidades.push({{ proveedor.count }});
+            // Gráfico: Estado de Consumo
+            let estadosConsumo = [], cantidadesConsumo = [];
+            {% for consumo in consumos %}
+                estadosConsumo.push("{{ consumo.estado_consumo }}");
+                cantidadesConsumo.push({{ consumo.count }});
             {% endfor %}
-            crearGrafico("estado_proveedores", "bar", estados, cantidades, ["#96ac60", "#FF6565"], "Cantidad de Proveedores");
+            crearGrafico("estado_consumo", "bar", estadosConsumo, cantidadesConsumo, ["#96ac60", "#FF6565"], "Cantidad de Consumos");
 
-            // Gráfico: Tipo de Producto
-            let tiposProducto = [], cantidadesProducto = [];
-            {% for producto in productos %}
-                tiposProducto.push("{{ producto.tipo_prod }}");
-                cantidadesProducto.push({{ producto.count }});
+            // Gráfico: Estado de Perfil
+            let estadosPerfil = [], cantidadesPerfil = [];
+            {% for perfil in perfiles %}
+                estadosPerfil.push("{{ perfil.estado_per }}");
+                cantidadesPerfil.push({{ perfil.count }});
             {% endfor %}
-            crearGrafico("tipo_producto", "bar", tiposProducto, cantidadesProducto, ["#66b3ff", "#ff6666", "#99ff99", "#ffcc66"], "Cantidad de Productos");
+            crearGrafico("estado_perfil", "pie", estadosPerfil, cantidadesPerfil, ["#66b3ff", "#ff6666"], "Cantidad de Perfiles");
 
-            // Gráfico: Productos con Bajo Stock
-            let nombresProductos = [], stocks = [];
-            {% for producto in productos_bajos_stock %}
-                nombresProductos.push("{{ producto.nombre_prod }}");
-                stocks.push({{ producto.stock_prod }});
+            // Gráfico: Estado de Medidores
+            let estadosMedidores = [], cantidadesMedidores = [];
+            {% for medidor in medidores %}
+                estadosMedidores.push("{{ medidor.estado_med }}");
+                cantidadesMedidores.push({{ medidor.count }});
             {% endfor %}
-            crearGrafico("productos_bajos_stock", "bar", nombresProductos, stocks, ["#FF6565"], "Stock de Productos");
+            crearGrafico("estado_medidores", "bar", estadosMedidores, cantidadesMedidores, ["#66b3ff", "#ff6666", "#99ff99", "#ffcc66"], "Cantidad de Medidores");
+
+            // Gráfico: Historial de Propietario
+            let propietarios = [], medidores = [], fechas = [];
+            {% for historial in historial_data %}
+                propietarios.push("{{ historial.propietario }}");
+                medidores.push("{{ historial.medidor }}");
+                fechas.push("{{ historial.fecha_cambio_his|date:'d-m-Y' }}");
+            {% endfor %}
+            crearGrafico("historial_propietario", "bar", fechas, medidores, ["#FF9966"], "Medidores por Fecha");
+
+            // Gráfico: Recaudaciones por Impuesto
+            let etiquetasRecaudaciones = [], datosRecaudaciones = [];
+            {% for rec in recaudaciones %}
+                etiquetasRecaudaciones.push("{{ rec.anio }}-{{ rec.mes }} {{ rec.impuesto }}");
+                datosRecaudaciones.push({{ rec.total_recaudaciones }});
+            {% endfor %}
+            crearGrafico("recaudaciones_impuestos", "bar", etiquetasRecaudaciones, datosRecaudaciones, ["#4285F4", "#FFCA28", "#34A853", "#EA4335"], "Total de Recaudaciones");
+
+            // Gráfico: Socios con Más Recaudaciones
+            let socios = [], recaudaciones = [];
+            {% for socio in socios_recaudaciones %}
+                socios.push("{{ socio.nombres_soc }} {{ socio.primer_apellido_soc }}");
+                recaudaciones.push({{ socio.total_recaudaciones }});
+            {% endfor %}
+            crearGrafico("socios_recaudaciones", "polarArea", socios, recaudaciones, ["#ffcc66", "#66b3ff", "#ff6666", "#99ff99", "#ff9966"], "Total de Recaudaciones");
+
+            // Nuevo gráfico: Estado de Tarifas
+            let estadosTarifas = [], cantidadesTarifas = [];
+            {% for tarifa in tarifas %}
+                estadosTarifas.push("{{ tarifa.estado_tar }}");
+                cantidadesTarifas.push({{ tarifa.count }});
+            {% endfor %}
+            crearGrafico("estado_tarifas", "doughnut", estadosTarifas, cantidadesTarifas, ["#FFBB33", "#33CCFF"], "Cantidad de Tarifas");
+
+            // Gráfico: Medidores por Ruta
+            let rutas = [], cantidadMedidores = [];
+            {% for ruta in medidores_por_ruta %}
+                rutas.push("{{ ruta.nombre_rut }}");
+                cantidadMedidores.push({{ ruta.cantidad }});
+            {% endfor %}
+            crearGrafico("medidores_por_ruta", "bar", rutas, cantidadMedidores, ["#66b3ff", "#ff6666"], "Cantidad de Medidores");
+
+            // Gráfico: Estado de Ruta
+            let estadosRuta = [], cantidadesRuta = [];
+            {% for ruta in rutas %}
+                estadosRuta.push("{{ ruta.estado_rut }}");
+                cantidadesRuta.push({{ ruta.count }});
+            {% endfor %}
+            crearGrafico("estado_ruta", "bar", estadosRuta, cantidadesRuta, ["#FFB84D", "#66ccff"], "Cantidad de Rutas");
+
+            
         }
     });
 </script>

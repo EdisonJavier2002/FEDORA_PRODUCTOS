@@ -1,155 +1,67 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Proveedor, Producto
+from .models import Consumo, Perfil, Medidor, HistorialPropietario, Comunicado, Socio, Tarifa, Ruta, Recaudacion
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 # Para los dashboard
-from django.db.models import Count
+from django.db.models import Count, F
 
 # Home
 def home(request):
     return render(request,"home.html")
 
+# Dashboard
 def dashboard(request):
-    # Consulta que cuenta el número de proveedores por estado
-    proveedores = Proveedor.objects.values('estado_prove').annotate(count=Count('id_prove'))
+    # PKI 1 Obtener el conteo agrupado por estado_consumo
+    consumos = Consumo.objects.values('estado_consumo').annotate(count=Count('estado_consumo'))
 
-    # Consulta que cuenta el número de productos por tipo
-    productos = Producto.objects.values('tipo_prod').annotate(count=Count('id_prod'))
+    # PKI 2 Obtener el conteo agrupado por estado_per de la tabla Perfil
+    perfiles = Perfil.objects.values('estado_per').annotate(count=Count('estado_per'))
 
-    # Consulta para obtener los productos con stock menor a 5, ordenados ascendentemente
-    productos_bajos_stock = Producto.objects.filter(stock_prod__lt=5).order_by('stock_prod')[:3]
+    # PKI 3 Obtener el conteo agrupado por estado_med
+    medidores = Medidor.objects.values('estado_med').annotate(count=Count('estado_med'))
 
-    # Pasar ambos conjuntos de datos al contexto
-    return render(request, 'dashboard.html', {
-        'proveedores': proveedores,
-        'productos': productos,
-        'productos_bajos_stock': productos_bajos_stock
-    })
+    # PKI 4 Obtener los datos del historial de propietario
+    historial_data = HistorialPropietario.objects.select_related('fk_id_soc', 'fk_id_med') \
+        .values('fk_id_soc__nombres_soc', 'fk_id_med__numero_med', 'fecha_cambio_his', 'estado_his') \
+        .order_by('-fecha_cambio_his')[:10]  # Aquí seleccionas el número de registros que desees
 
-#----------------------------------------PROVEEDORES
-# Listar Proveedores
-def listadoProveedores(request):
-    proveedores = Proveedor.objects.all()
-    return render(request, "listadoProveedores.html", {'proveedores': proveedores})
 
-# Eliminar Proveedor
-def eliminarProveedor(request, id):
-    proveedorEliminar = Proveedor.objects.get(id_prove=id)
-    proveedorEliminar.delete()
-    messages.success(request, "Proveedor eliminado exitosamente.")
-    return redirect('listadoProveedores')
-
-# Formulario Nuevo Proveedor
-def nuevoProveedor(request):
-    return render(request, 'nuevoProveedor.html')
-
-# Guardar Nuevo Proveedor
-def guardarProveedor(request):
-    ruc = request.POST["ruc_prove"]
-    nombre = request.POST["nombre_prove"]
-    telefono = request.POST["telefono_prove"]
-    estado = request.POST["estado_prove"]
-    Proveedor.objects.create(ruc_prove=ruc, nombre_prove=nombre, telefono_prove=telefono, estado_prove=estado)
-    messages.success(request, "Proveedor registrado exitosamente.")
-    return redirect('listadoProveedores')
-
-# Formulario Editar Proveedor
-def editarProveedor(request, id):
-    proveedorEditar = Proveedor.objects.get(id_prove=id)
-    return render(request, 'editarProveedor.html', {'proveedorEditar': proveedorEditar})
-
-# Actualizar Proveedor
-def procesarActualizacionProveedor(request):
-    id = request.POST['id_prove']
-    ruc = request.POST['ruc_prove']
-    nombre = request.POST['nombre_prove']
-    telefono = request.POST['telefono_prove']
-    estado = request.POST['estado_prove']
-    proveedorConsultado = Proveedor.objects.get(id_prove=id)
-    proveedorConsultado.ruc_prove = ruc
-    proveedorConsultado.nombre_prove = nombre
-    proveedorConsultado.telefono_prove = telefono
-    proveedorConsultado.estado_prove = estado
-    proveedorConsultado.save()
-    messages.success(request, "Proveedor actualizado exitosamente.")
-    return redirect('listadoProveedores')
-
-#----------------------------------------PRODUCTOS
-# Listado de Productos
-def listadoProductos(request):
-    productos = Producto.objects.all()
-    proveedores = Proveedor.objects.all()
-    return render(request, "listadoProductos.html", {'productos': productos, 'proveedores': proveedores})
-
-# Eliminar Producto
-def eliminarProducto(request, id):
-    productoEliminar = Producto.objects.get(id_prod=id)
-    productoEliminar.delete()
-    messages.success(request, "Producto eliminado exitosamente.")
-    return redirect('listadoProductos')
-
-# Formulario Nuevo Producto
-def nuevoProducto(request):
-    proveedores = Proveedor.objects.all()  # Obtener todos los proveedores
-    return render(request, 'nuevoProducto.html', {'proveedores': proveedores})
-
-# Guardar Nuevo Producto
-def guardarProducto(request):
-    nombre = request.POST["nombre_prod"]
-    stock = request.POST["stock_prod"]
-    precio = request.POST["precio_prod"]
-    tipo = request.POST["tipo_prod"]
-    fecha = request.POST["fecha_prod"]
-    cantidad = request.POST["cantidad_prod"]
-    proveedor_id = request.POST["id_prove"]
-    proveedor = Proveedor.objects.get(id_prove=proveedor_id)
-    Producto.objects.create(
-        nombre_prod=nombre,
-        stock_prod=stock,
-        precio_prod=precio,
-        tipo_prod=tipo,
-        fecha_prod=fecha,
-        cantidad_prod=cantidad,
-        id_prove=proveedor
+    # PKI 5 Obtener el total de recaudaciones agrupadas por año, mes e impuesto
+    recaudaciones = (
+        Recaudacion.objects
+        .annotate(anio=F('fecha_emision_rec__year'), mes=F('fecha_emision_rec__month'), impuesto=F('estado_rec'))
+        .values('anio', 'mes', 'impuesto')
+        .annotate(total_recaudaciones=Count('id_rec'))
+        .order_by('-anio', '-mes')
     )
-    messages.success(request, "Producto registrado exitosamente.")
-    return redirect('listadoProductos')
+
+    # PKI 6 Obtener los socios con más recaudaciones
+    socios_recaudaciones = Socio.objects.annotate(total_recaudaciones=Count('recaudacion')).order_by('-total_recaudaciones')[:5]
+
+    # PKI 7 Obtener el conteo agrupado por estado_tar Cantidad de Tarifas Activas e Inactivas
+    tarifas = Tarifa.objects.values('estado_tar').annotate(count=Count('estado_tar'))
+
+    # PKI 8 Obtener el conteo de medidores por ruta
+    medidores_por_ruta = Ruta.objects.annotate(cantidad=Count('medidor')).values('nombre_rut', 'cantidad')
+
+    # KPI 9 # Obtener el conteo agrupado por estado_rut
+    rutas = Ruta.objects.values('estado_rut').annotate(count=Count('estado_rut'))
+
+    # KPI 10 Obtener los últimos 10 comunicados
+    comunicados = Comunicado.objects.all().order_by('-fecha_com')[:2]
 
 
-# Vista para editar producto
-def editarProducto(request, id):
-    productoEditar = Producto.objects.get(id_prod=id)
-    # Convertir el precio a un número con 2 decimales
-    precio_formateado = "{:.2f}".format(productoEditar.precio_prod)
-    proveedores = Proveedor.objects.all()
-    return render(request, 'editarProducto.html', {'productoEditar': productoEditar, 'precio_formateado': precio_formateado, 'proveedores': proveedores})
-# Actualizar Producto
-# Vista para procesar la actualización de producto
-def procesarActualizacionProducto(request):
-    id_prod = request.POST['id_prod']
-    nombre = request.POST['nombre_prod']
-    stock = request.POST['stock_prod']
-    precio = request.POST['precio_prod']
-    tipo = request.POST['tipo_prod']
-    fecha = request.POST['fecha_prod']
-    cantidad = request.POST['cantidad_prod']
-    id_prove = request.POST['id_prove']
-
-    # Obtener el proveedor correspondiente
-    proveedor = Proveedor.objects.get(id_prove=id_prove)
-    
-    # Actualizar el producto
-    producto = Producto.objects.get(id_prod=id_prod)
-    producto.nombre_prod = nombre
-    producto.stock_prod = stock
-    producto.precio_prod = precio
-    producto.tipo_prod = tipo
-    producto.fecha_prod = fecha
-    producto.cantidad_prod = cantidad
-    producto.id_prove = proveedor
-    producto.save()
-
-    messages.success(request, "Producto actualizado exitosamente.")
-    return redirect('listadoProductos')
+    return render(request, "dashboard.html",{
+        "consumos": consumos,
+        "perfiles": perfiles,
+        "medidores": medidores,
+        "historial_data": historial_data,
+        "recaudaciones": recaudaciones,
+        "socios_recaudaciones": socios_recaudaciones,
+        "tarifas": tarifas, 
+        "medidores_por_ruta": medidores_por_ruta,
+        "rutas": rutas,
+        "comunicados": comunicados,
+    })
